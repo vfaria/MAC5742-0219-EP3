@@ -100,12 +100,18 @@ void update_rgb_buffer(int iteration, int x, int y){
 
 void write_to_file(){
     FILE * file;
-    char * filename               = "output.ppm";
-    char * comment                = "# ";
+    char filename[64];
+    char * comment = "# ";
 
     int max_color_component_value = 255;
+    int world_rank;
 
-    file = fopen(filename,"wb");
+    // Each process will append its rank to the output image filename,
+    // so we can be sure that each one of them is doing its job correctly
+    // when running locally.
+    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    sprintf(filename, "output_%d.ppm", world_rank);
+    file = fopen(filename, "wb");
 
     fprintf(file, "P6\n %s\n %d\n %d\n %d\n", comment,
             i_x_max, i_y_max, max_color_component_value);
@@ -141,17 +147,16 @@ void compute_mandelbrot(){
     // Get the rank of the process
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
 
-
-    for(i_y = 0; i_y < i_y_max; i_y++){
+    for (i_y = 0; i_y < i_y_max; i_y++) {
         c_y = c_y_min + i_y * pixel_height;
 
-        if(fabs(c_y) < pixel_height / 2){
+        if (fabs(c_y) < pixel_height / 2) {
             c_y = 0.0;
         };
 
-        for(i_x = (i_x_max / world_size) * world_rank;
-                i_x < (i_x_max / world_size) * (world_rank + 1);
-                i_x++){
+        for (i_x = (i_x_max / world_size) * world_rank;
+             i_x < (i_x_max / world_size) * (world_rank + 1);
+             i_x++) {
 
             c_x         = c_x_min + i_x * pixel_width;
 
@@ -161,10 +166,10 @@ void compute_mandelbrot(){
             z_x_squared = 0.0;
             z_y_squared = 0.0;
 
-            for(iteration = 0;
-                iteration < iteration_max && \
-                ((z_x_squared + z_y_squared) < escape_radius_squared);
-                iteration++){
+            for (iteration = 0;
+                 iteration < iteration_max && \
+                 ((z_x_squared + z_y_squared) < escape_radius_squared);
+                 iteration++) {
                 z_y         = 2 * z_x * z_y + c_y;
                 z_x         = z_x_squared - z_y_squared + c_x;
 
@@ -172,7 +177,8 @@ void compute_mandelbrot(){
                 z_y_squared = z_y * z_y;
             };
 
-            update_rgb_buffer(iteration, i_x, i_y);
+            // We do not want to do IO.
+            // update_rgb_buffer(iteration, i_x, i_y);
         };
     };
 };
@@ -180,11 +186,12 @@ void compute_mandelbrot(){
 int main(int argc, char *argv[]){
     init(argc, argv);
 
-    allocate_image_buffer();
+    // We don't need to print the image.
+    // allocate_image_buffer();
 
     compute_mandelbrot();
 
-    write_to_file();
+    // write_to_file();
 
     MPI_Finalize();
 

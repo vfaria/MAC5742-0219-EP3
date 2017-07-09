@@ -1,0 +1,16 @@
+
+ Performance counter stats for 'mpirun -hostfile mpi_hosts -np 8 ./mandelbrot_mpi -2.5 1.5 -2.0 2.0 8192' (10 runs):
+
+      13334.560903      task-clock (msec)         #    2.060 CPUs utilized            ( +-  1.31% )
+               248      context-switches          #    0.019 K/sec                    ( +-  1.31% )
+                32      cpu-migrations            #    0.002 K/sec                    ( +-  4.54% )
+              8892      page-faults               #    0.667 K/sec                    ( +-  0.04% )
+   <not supported>      cycles                   
+   <not supported>      stalled-cycles-frontend  
+   <not supported>      stalled-cycles-backend   
+   <not supported>      instructions             
+   <not supported>      branches                 
+   <not supported>      branch-misses            
+
+       6.472057575 seconds time elapsed                                          ( +-  0.93% )
+
